@@ -1,4 +1,3 @@
-# godfix
 Day 1. Base on "C" 
 
 Today My First Study is  Start !!
