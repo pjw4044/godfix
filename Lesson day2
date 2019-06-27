@@ -1,0 +1,29 @@
+Today First mission .
+I should make 3subject total and average.
+
+Start !!
+
+#include <stdio.h>
+
+int main(){
+
+int korean,english,math;
+int total;
+double avg;
+
+printf("===============================\n");
+printf("kor,eng,math Please enter in : "\n);
+printf("================================\n);
+scanf("%d%d%d", &korea,&english,&math);
+
+total = korea + english + math;
+avg = (double)total/3;
+
+printf("totla is %d, average is %.2lf, total,avg);
+
+return 0;
+}
+
+
+
+
