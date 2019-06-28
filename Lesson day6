@@ -1,0 +1,154 @@
+// 문제 : 2중 포인터만 사용해서 함수안의 모든 지역변수의 값을 변경해주세요.
+// 조건 : 아래와 같이 출력되도록 해주세요.
+// 조건 : 수정가능지역에서는 오직 pp만 이용할 수 있습니다.
+
+#include <stdio.h>
+
+
+// 솔루션1 - a1, a2, a3값을 직접 해결
+void sol1() {
+  int* p;
+  int** pp = &p;
+
+  int a1;
+  int a2;
+  int a3;
+
+  printf("&a1 : %ld\n", (long)&a1);
+  printf("&a2 : %ld\n", (long)&a2);
+  printf("&a3 : %ld\n", (long)&a3);
+
+  printf("&p : %ld\n", (long)&p);
+  printf("&pp : %ld\n", (long)&pp);
+  printf("pp : %ld\n", (long)pp);
+
+  // 수정가능지역 시작
+  
+  a1=100;
+  a2=200;
+  a3=300;
+  
+  
+  // 수정가능지역 끝
+
+  printf("a1 : %d\n", a1);
+  // 출력 => a1 : 100
+  printf("a2 : %d\n", a2);
+  // 출력 => a2 : 200
+  printf("a3 : %d\n", a3);
+  // 출력 => a3 : 300
+}
+
+// 솔루션2 - a1의 주소를 이용해 포인터 p를 이용한 포인터 연산으로 해결
+void sol2() {
+  int* p;
+  int** pp = &p;
+
+  printf("&a1 : %ld\n", (long)&a1);
+  printf("&a2 : %ld\n", (long)&a2);
+  printf("&a3 : %ld\n", (long)&a3);
+
+  printf("&p : %ld\n", (long)&p);
+  printf("&pp : %ld\n", (long)&pp);
+  printf("pp : %ld\n", (long)pp);
+
+  // 수정가능지역 시작
+  
+  
+  p=&a1;
+  *p=100;
+  *(p-1)=200;
+  *(p-2)=300;
+
+  // 수정가능지역 끝
+
+  printf("a1 : %d\n", a1);
+  // 출력 => a1 : 100
+  printf("a2 : %d\n", a2);
+  // 출력 => a2 : 200
+  printf("a3 : %d\n", a3);
+  // 출력 => a3 : 300
+}
+
+
+// 솔루션3 - a1의 주소를 이용해 포인터 p와 이중 포인터 pp를 이용하여 해결
+void sol3() {
+  int* p;
+  int** pp = &p;
+
+  int a1;
+  int a2;
+  int a3;
+
+  printf("&a1 : %ld\n", (long)&a1);
+  printf("&a2 : %ld\n", (long)&a2);
+  printf("&a3 : %ld\n", (long)&a3);
+
+  printf("&p : %ld\n", (long)&p);
+  printf("&pp : %ld\n", (long)&pp);
+  printf("pp : %ld\n", (long)pp);
+
+  // 수정가능지역 시작
+  
+  p=&a1;
+  *(*pp)=100;
+  *((*pp)-1)=200;
+   *((*pp)-2)=300;
+
+  
+
+  // 수정가능지역 끝
+
+  printf("a1 : %d\n", a1);
+  // 출력 => a1 : 100
+  printf("a2 : %d\n", a2);
+  // 출력 => a2 : 200
+  printf("a3 : %d\n", a3);
+  // 출력 => a3 : 300
+}
+
+// 솔루션4 - 오직 pp를 이용하여 해결
+void sol4() {
+  int* p;
+  int** pp = &p;
+
+  int a1;
+  int a2;
+  int a3;
+
+  printf("&a1 : %ld\n", (long)&a1);
+  printf("&a2 : %ld\n", (long)&a2);
+  printf("&a3 : %ld\n", (long)&a3);
+
+  printf("&p : %ld\n", (long)&p);
+  printf("&pp : %ld\n", (long)&pp);
+  printf("pp : %ld\n", (long)pp);
+
+  // 수정가능지역 시작
+  
+  *pp=(int*)(p-2);
+  **pp=200;
+  *(*pp-1)=100;
+  *(*PP+1)=300;
+  
+  
+ 
+  // 수정가능지역 끝
+
+  printf("a1 : %d\n", a1);
+  // 출력 => a1 : 100
+  printf("a2 : %d\n", a2);
+  // 출력 => a2 : 200
+  printf("a3 : %d\n", a3);
+  // 출력 => a3 : 300
+}
+
+int main(void) {
+  printf("== 정답 ==\n");
+  sol1();
+  sol2();
+  sol3(); 
+  sol4();
+
+  return 0;
+}
