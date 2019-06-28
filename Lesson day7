@@ -1,0 +1,40 @@
+int arr[] ={10,20,30,40,50}; //선언방법1.
+int arr2[10]; //선언방법2.
+
+
+//방법은 똑같음..!!
+int a=10;
+printf("a : %d\n", a);
+a=20;
+printf("a : %d\n", a);
+
+printf("arr[0] : %d\n", arr[0]); //인덱스 통해 배열 이용.
+
+arr[0]=20;
+printf("arr[0] : %d\n", arr[0]);
+
+printf("arr[4] : %d\n", arr[4]);
+========================================
+
+
+int arr[6] ={9,5,7,2,4,0};
+int arr2[6]={9,5,7,2,4,0};
+int arr3;
+
+arr3[0]=9;
+arr3[1]=5;
+arr3[2]=7;
+arr3[3]=2;
+arr3[4]=4;
+arr3[5]=0;
+
+for(int i=0;i <6;i++){
+  printf("%d\n", arr3[i]);
+}
+
+printf("arr[0] : %d\n", arr[0]);
+printf("arr[1] : %d\n", arr[1]);
+printf("arr[2] : %d\n", arr[2]);
+printf("arr[3] : %d\n", arr[3]);
+printf("arr[4] : %d\n", arr[4]);
+printf("arr[5] : %d\n", arr[5]);
