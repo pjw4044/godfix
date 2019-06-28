@@ -1,0 +1,27 @@
+#include <stdio.h>
+
+
+int main()
+{
+
+ int intiger=0;
+ int plusSum=0;
+ int mainerSum=0;
+
+ printf("정수 10개를 입력하세여\n");
+
+ for(int i=0;i<10;i++){
+  printf("%d번째 정수 입력 : ",i+1);
+
+  scanf("%d",&intiger);
+
+  if(intiger%2==0){
+   plusSum+=intiger;
+  }else{
+   mainerSum+=intiger;
+  }
+ }
+
+  printf("\n입력하신 10개의 짝수 합은 %d 입니다.\n",plusSum);
+ printf("입력하신 10개의 홀수 합은 %d 입니다.\n",mainerSum);
+}
