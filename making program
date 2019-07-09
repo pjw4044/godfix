@@ -1,0 +1,29 @@
+Frist making program testing ...
+wages calculator Tds.
+
+#include <stdio.h>
+
+int main()
+{
+	int iPay, iTime, iDays, iTax;
+	float fResult;
+
+	printf("시간당 급여? "); scanf("%d", &iPay);
+	printf("일일 근무 시간? "); scanf("%d", &iTime);
+	printf("한달 근무 일수? "); scanf("%d", &iDays);
+	printf("세금적용 여부( 0:미적용, 1:4대보험 공제 8.41%, 2:소득세공제 3.3% )? "); scanf("%d", &iTax);
+
+	fResult = iPay * iTime * iDays;
+	if (iTax == 1) fResult -= fResult * 0.0841;
+	else if (iTax == 2) fResult -= fResult * 0.033;
+
+	printf("예상 급여 ==> %.0f원\n", fResult);
+	return 0;
+}
+
+
+
+=============================================================
+Input pay, time, days, 
+tax is Choice 0,1,2
+and Result Showing ~
