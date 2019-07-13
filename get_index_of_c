@@ -1,0 +1,40 @@
+nuber 2.
+
+// 문제 : 문장에서 특정 문자의 위치를 반환하는 함수를 만들어주세요.(get_index_of_c)
+
+#include <stdio.h>
+
+??? get_index_of_c(???, ???) {
+
+}
+
+int main(void) {
+  int index;
+  
+  index = get_index_of_c("abc", 'b');
+  printf("index : %d\n", index);
+  // 출력 => index : 1
+
+  index = get_index_of_c("test", 's');
+  printf("index : %d\n", index);
+  // 출력 => index : 2
+
+  return 0;
+}
+
+==========================================================================
+==>
+
+int get_index_of_c(char* str , char num){
+  int index=0;
+  char* ptr =str;
+  
+  for(int i=0; ptr[i] != '\0';i++){
+    if(ptr[i]==num){
+    index = i;
+    break;
+    }
+  }
+  return index;
+}
+==========================================================================
