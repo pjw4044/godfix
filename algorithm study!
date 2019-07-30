@@ -1,0 +1,49 @@
+// 문제 : 몇명의 사람의 나이를 받을지 입력받고 입력받은 수 만큼 나이를 입력받은 후 저장해주세요.
+// 조건 : malloc을 사용할 수 없습니다.
+
+#include <stdio.h>
+#define SIZE 100
+#define true 1
+#define false 0
+
+typedef struct _Person{
+  char name[100];
+  int age;
+}Person;
+
+int main(void) {
+  int input;
+  Person p[SIZE];
+  
+  while(true){
+    printf("사람수를 숫자를 입력해주세요 : ");
+    scanf("%d", &input);
+  
+    if(input <= 0){
+      printf("1보다 큰수를 입력해주세요 ");
+      
+    }else if(input <= SIZE){
+      printf("%d이하로 입력해주세요 ", SIZE);
+    } else {
+      break;
+
+    }
+  }
+  
+
+  printf("%d명의 데이터를 입력받습니다.\n", input);
+  
+  for(int i=0;i< input ;i++){
+    printf("%d번째 사람의 이름을 입력해주세요 : ", i+1);
+    scanf("%s", p[i].name);
+    printf("%d번째 사람의 나이를 입력해주세요 : ", i+1);
+    scanf("%d", &p[i].age);
+
+  }
+  for(int i=0; i< input ;i++){
+    printf("%d번째 사람의 이름, 나이 : %s , %d세\n", i+1, p[i].name, p[i].age);
+    
+  }
+
+  return 0;
+}
