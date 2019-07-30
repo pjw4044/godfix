@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <malloc.h>
+#define MAX_COUNT 5
+
+int count=0;
+
+struct client{
+ char name[11];
+ char address[14];
+ int age;
+ double height;
+ double weight;
+};
+
+ 
+ void ShowList(struct client *p);
+
+ int AddClient(struct client *p){
+   if(count >= MAX_COUNT){
+     printf("더이상 추가하수 없습니다.");
+     return 0;
+     
+   }else {
+     printf("①.이름을 입력하세요 : ");
+     scanf("%s", p[count].name);
+     printf("②.지역을 입력하세요 : ");
+     scanf("%s", p[count].address);
+     printf("③.나이를 입력하세요 : ");
+     scanf("%d", &p[count].age);
+     printf("④.키를 입력하세요 : ");
+     scanf("%lf", &p[count].height);
+     printf("⑤.몸무게를 입력하세요 : ");
+     scanf("%lf", &p[count].weight);
+     printf("◕‿◕   정상적으로 입력되었습니다. ◕‿◕  \n");
+     printf("\n");
+     count++;
+     return 1;
+
+   }
+ }
+ 
+
+int DeleteClient(struct client *p){
+  int select;
+  int i;
+  
+  if(select <= 0){
+    printf("더이상 삭제할수 없습니다.");
+    return 0;
+  }else {
+    ShowList(p);
+    if(select >= 0 && select <= MAX_COUNT){
+      for(i =select; i< count;i++ ){
+
+      }
+      p[i-1].age=p[i].age;
+      p[i-1].height=p[i].height;
+      p[i-1].weight=p[i].weight;
+
+  printf("정보가 삭제되었습니다.\n");
+   count--;
+   return 1;
+  }
+  else {
+   printf("잘못된 번호입니다.\n");
+   return 0;
+  }
+ }
+}
+
+
+void ShowList(struct client *p) {
+ int i;
+ printf("★★★★★★★★★★★★★★★★★★★★★★★★★★★\n");
+ for (i = 0; i < count; i++) {
+  printf("%2d. %-11s  %-11s지역 %d세   %4.1f   %4.1f\n", i + 1, p[i].name, p[i].address, p[i].age, p[i].height, p[i].weight);
+ }
+}
+
+int main(void) {
+ int select;
+ struct client *p;//지식9. 구조체 포인터 사용
+
+ p = (struct client*)malloc(sizeof(struct client)*MAX_COUNT);
+
+
+  
+ while (1) {
+  printf("▓▓▓▓ 고객관리 프로그램 ▓▓▓▓▓\n");
+  printf("\n");
+  printf("★★★★★★★★★★★★★★★★★★★★★★★★★★★\n");
+  printf("\n");
+  printf("①. 새로운 게시트 등록하기\n");
+  printf("②. 기존의 게스트 삭제하기\n");
+  printf("③. 등록된 게스트 목록보기\n");
+  printf("④. 프로그램 종료하기\n");
+  printf("\n");
+  printf("★★★★★★★★★★★★★★★★★★★★★★★★★★★\n");
+  printf("\n");
+  printf("번호를 선택하세요 : ");
+  scanf("%d", &select);
+
+  switch (select) {
+  case 1:
+   AddClient(p);
+   break;
+  case 2:
+   DeleteClient(p);
+   break;
+  case 3:
+   ShowList(p);
+   break;
+  case 4:
+   printf("프로그램을 종료합니다.\n");
+   break;
+  default:
+   printf("입력이 잘못 되었습니다.\n");
+  }
+  if (select == 4) {
+   break;
+  }
+ }
+}
