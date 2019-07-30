@@ -1,0 +1,61 @@
+// 문제 : 몇명의 사람의 나이를 받을지 입력받고 입력받은 수 만큼 나이를 입력받은 후 저장해주세요.
+// 출력예시
+/*
+사람의 숫자를 입력해주세요. : 3[엔터]
+1번째 사람의 이름을 입력해주세요 : aa[엔터]
+1번째 사람의 나이를 입력해주세요 : 33[엔터]
+2번째 사람의 이름을 입력해주세요 : bb[엔터]
+2번째 사람의 나이를 입력해주세요 : 50[엔터]
+3번째 사람의 이름을 입력해주세요 : cc[엔터]
+3번째 사람의 나이를 입력해주세요 : 42[엔터]
+1번째 사람의 이름, 나이 : aa, 33세
+2번째 사람의 이름, 나이 : bb, 50세
+3번째 사람의 이름, 나이 : cc, 42세
+*/
+
+#include <stdio.h>
+#include <malloc.h>
+#define true 1
+#define false 0
+
+typedef struct _Person {
+  int age;
+  char name[100];
+} Person;
+
+int main(void) {
+  
+  int input;
+  Person *p;
+  
+   while ( true ) {
+    printf("사람의 숫자를 입력해주세요. :");
+    scanf("%d", &input);
+
+    if ( input <= 0 ) {
+      printf("1보다 큰 수를 입력해주세요.\n");
+    }
+    else {
+      break;
+    }
+  }
+
+  p=(Person*)malloc(sizeof(Person)*input);
+  
+  
+   for ( int i = 0; i < input; i++ ) {
+    printf("%d번째 사람의 이름을 입력해주세요 :", i + 1);
+    scanf("%s", p[i].name);
+    printf("%d번째 사람의 나이를 입력해주세요 :", i + 1);
+    scanf("%d", &p[i].age);
+  }
+
+  for ( int i = 0; i < input; i++ ) {
+    printf("%d번째 사람의 이름, 나이 : %s, %d세\n", i + 1, p[i].name, p[i].age);
+  }
+
+  free(p);
+
+
+  return 0;
+}
