@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.MemberDao">
+	<insert id="addMember" parameterType="map">
+		INSERT INTO `member`
+		SET regDate = NOW(),
+		loginId = #{loginId},
+		loginPw = #{loginPw},
+		name = #{name},
+		email = #{email},
+		authKey = #{authKey}
+	</insert>
+	
+	<select id="doubleCheckEmail" parameterType="map" resultType="Integer">
+		SELECT COUNT(id) FROM `member`
+		WHERE email = #{email} AND delStatus != TRUE
+	</select>
+	
+	<select id="doubleCheckLoginId" parameterType="map" resultType="Integer">
+		SELECT COUNT(id) FROM `member`
+		WHERE loginId = #{loginId} AND delStatus != TRUE
+	</select>
+	
+	<select id="getOneMemberByAuthKeyEmail" parameterType="map" resultType="Integer">
+		SELECT COUNT(*) FROM `member`
+		WHERE email = #{email} AND authKey = #{authKey} AND delStatus != TRUE
+	</select>
+	
+	<update id="memberEmailAuth" parameterType="map">
+		UPDATE `member`
+		SET emailAuthStatus = TRUE
+		WHERE email = #{email} AND authKey = #{authKey} AND delStatus != TRUE
+	</update>
+	
+	<select id="getOneMemberByLoginIdPw" parameterType="map" resultMap="member">
+		SELECT * FROM `member`
+		WHERE loginId = #{loginId} AND loginPw = #{loginPw} AND delStatus != TRUE
+	</select>
+	
+	<select id="getOneMemberById" parameterType="Integer" resultMap="member">
+		SELECT * FROM `member`
+		WHERE id = #{loginedMemberId} AND delStatus != TRUE
+	</select>
+	
+	<update id="deleteOneMember" parameterType="Integer">
+		UPDATE `member`
+		SET delStatus = TRUE
+		WHERE id = #{loginedMemberId}
+	</update>
+	
+	<select id="findLoginId" parameterType="map" resultType="string">
+		SELECT loginId FROM `member`
+		WHERE name = #{name} AND email = #{email} AND delStatus != TRUE
+	</select>
+	
+	<select id="findLoginPw" parameterType="map" resultType="string">
+		SELECT email FROM `member`
+		WHERE loginId = #{loginId} AND email = #{email} AND delStatus != TRUE
+	</select>
+	
+	<update id="changeTempPw" parameterType="map">
+		UPDATE `member`
+		SET loginPw = #{tempPw}
+		WHERE loginId = #{loginId} AND email = #{email} 
+	</update>
+	
+	<select id="getOneMemberByIdPw" parameterType="map" resultType="member">
+		SELECT * FROM `member`
+		WHERE id = #{loginedMemberId} AND loginPw = #{origin_loginPw} AND delStatus != TRUE
+	</select>
+	
+	<update id="changeLoginPw" parameterType="map">
+		UPDATE `member`
+		SET loginPw = #{loginPw}
+		WHERE id = #{loginedMemberId} AND loginPw = #{origin_loginPw} AND delStatus != TRUE
+	</update>
+	
+	<select id="getMemberRole" parameterType="Integer" resultType="string">
+		SELECT attrValue FROM memberAttr
+		WHERE memberId = #{loginedMemberId} AND attrName= 'ROLE'
+	</select>
+	
+	<select id="getAllMembers" resultMap="member">
+		SELECT * FROM `member`
+		WHERE id != #{loginedMemberId}
+	</select>
+	
+	<insert id="addLetter" parameterType="map">
+		INSERT INTO `letter`
+		SET regDate = NOW(),
+		fromMemberId = #{loginedMemberId},
+		toMemberId = #{toId},
+		body = #{body}
+	</insert>
+	
+	<select id="getAllLetters" parameterType="map" resultMap="letter">
+		SELECT L.*, IFNULL(M.loginId ,'존재하지 않는 사용자') AS writer FROM
+		`letter` AS L
+		LEFT OUTER JOIN `member` AS M
+		ON IF(L.fromMemberId = #{loginedMemberId}, M.id = L.toMemberId, M.id = L.fromMemberId) AND M.delStatus != TRUE
+		WHERE 1=1
+		<if test="searchType != null and searchType != ''">
+			<if test="searchType == 'all'"> AND (toMemberId = #{loginedMemberId} OR fromMemberId= #{loginedMemberId}) </if>
+			<if test="searchType == 'receive'"> AND toMemberId = #{loginedMemberId} </if>
+			<if test="searchType == 'send'"> AND fromMemberId = #{loginedMemberId} </if>
+		</if>
+		<if test="searchType == null or searchType == ''">
+			AND (toMemberId = #{loginedMemberId} OR fromMemberId= #{loginedMemberId})
+		</if>
+		ORDER BY L.id DESC
+		LIMIT #{startNum}, #{perPageNum}
+	</select>
+	
+	<select id="getTotalLetterCount" parameterType="map" resultType="Integer">
+		SELECT COUNT(*) FROM letter
+		WHERE 1=1
+		<if test="searchType != null and searchType != ''">
+			<if test="searchType == 'all'"> AND (toMemberId = #{loginedMemberId} OR fromMemberId= #{loginedMemberId}) </if>
+			<if test="searchType == 'receive'"> AND toMemberId = #{loginedMemberId} </if>
+			<if test="searchType == 'send'"> AND fromMemberId = #{loginedMemberId} </if>
+		</if>
+		<if test="searchType == null or searchType == ''">
+			AND (toMemberId = #{loginedMemberId} OR fromMemberId= #{loginedMemberId})
+		</if>		
+	</select>
+	
+	<delete id="deleteOneLetterById" parameterType="Integer">
+		DELETE FROM letter		
+		WHERE id = #{id}
+	</delete>
+	
+	<select id="getOneLetterById" parameterType="Integer" resultMap="letter">
+		SELECT * FROM letter
+		WHERE id = #{id}
+	</select>
+	
+	<insert id="addReport" parameterType="map">
+		INSERT INTO report
+		SET regDate = NOW(),
+		relId = #{relId},
+		relType = #{relType},
+		`body` = #{body},
+		memberId = #{loginedMemberId}
+	</insert>
+	
+	<select id="getAllReports" parameterType="map" resultMap="report">
+		SELECT R.*, A.id AS articleId, A.boardId, AR.articleId AS AR_articleId , AR.boardId AS AR_boardId, IFNULL(M.loginId, '존재하지 않는 사용자') AS writer
+		FROM report AS R
+		LEFT OUTER JOIN article AS A
+		ON R.relType = 'article' AND R.relId = A.id
+		LEFT OUTER JOIN articleReply AS AR
+		ON R.relType = 'reply' AND R.relId = AR.id
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = R.memberId
+		ORDER BY R.id DESC
+		LIMIT #{startNum}, #{perPageNum}
+	</select>
+	
+	<select id="getTotalReportCount" parameterType="map" resultType="Integer">
+		SELECT COUNT(*) FROM report		
+	</select>
+	
+	<select id="getMemberLetterList" parameterType="map" resultMap="letter">
+		SELECT * FROM letter
+		WHERE ( (toMemberId = #{loginedMemberId} AND fromMemberId = #{memberId}) OR (toMemberId = #{memberId} AND fromMemberId = #{loginedMemberId}) )
+		<if test="lastLetterId != null and lastLetterId != ''">
+			AND (id > #{lastLetterId}
+		</if>
+		<if test="lastSendLetterId != null and lastSendLetterId != ''">
+			OR id = #{lastSendLetterId})
+		</if>		 
+	</select>
+	
+	<update id="updateMemberLetterView" parameterType="map">
+		UPDATE letter
+		SET viewStatus = TRUE
+		WHERE toMemberId = #{loginedMemberId} AND fromMemberId = #{memberId}
+		<if test="lastLetterId != null and lastLetterId != ''">
+			AND id >= #{lastLetterId}
+		</if>				
+	</update>
+	
+	<select id="getMemberProfileImg" parameterType="map" resultType="MemberProfileImg">
+		SELECT * FROM memberProfileImg
+		WHERE memberId = #{loginedMemberId}
+	</select>
+	
+	<delete id="deleteMemberProfileImg" parameterType="map">
+		DELETE FROM memberProfileImg
+		WHERE memberId = #{loginedMemberId}
+	</delete>
+	
+	<update id="modifyMemberProfileImg" parameterType="map">
+		UPDATE memberProfileImg
+		SET  regDate = NOW(),
+		fileName = #{fileName}
+		WHERE memberId = #{loginedMemberId}
+	</update>
+	
+	<insert id="addMemberProfileImg" parameterType="map">
+		INSERT INTO memberProfileImg
+		SET regDate = NOW(),
+		memberId = #{loginedMemberId},
+		fileName = #{fileName}
+	</insert>
+	
+	<update id="updateMemberExp" parameterType="map">
+		UPDATE `member`
+		SET `exp` = `exp`+1
+		WHERE id = #{loginedMemberId}
+	</update>
+	
+	
+	<resultMap id="letter" type="com.example.demo.dto.Letter">
+		<id property="id" column="id"/>
+		<id property="regDate" column="regDate"/>
+		<id property="fromMemberId" column="fromMemberId"/>
+		<id property="toMemberId" column="toMemberId"/>
+		<id property="body" column="body"/>		
+		<id property="viewStatus" column="viewStatus"/>
+		<association property="extra" javaType="map">
+			<id property="writer" column="writer"></id>
+		</association>		
+	</resultMap>
+	
+	<resultMap id="member" type="com.example.demo.dto.Member">
+		<id property="id" column="id"/>
+		<id property="regDate" column="regDate"/>
+		<id property="loginId" column="loginId"/>
+		<id property="name" column="name"/>
+		<id property="email" column="email"/>
+		<id property="authKey" column="authKey"/>
+		<id property="emailAuthStatus" column="emailAuthStatus"/>
+		<id property="delStatus" column="delStatus"/>
+		<id property="exp" column="exp"/>
+	</resultMap>
+	
+	<resultMap id="report" type="com.example.demo.dto.Report">
+		<id property="id" column="id"/>
+		<id property="regDate" column="regDate"/>
+		<id property="relId" column="relId"/>
+		<id property="relType" column="relType"/>
+		<id property="memberId" column="memberId"/>
+		<id property="body" column="body"/>
+		<association property="extra" javaType="map">
+			<id property="articleId" column="articleId"/>
+			<id property="boardId" column="boardId"/>
+			<id property="articleId" column="AR_articleId"/>
+			<id property="boardId" column="AR_boardId"/>
+			<id property="writer" column="writer"/>
+		</association>		
+	</resultMap>
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.ArticleReplyDao">
+	<insert id="addReply" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO articleReply
+		SET regDate = NOW(),
+		articleId = #{articleId},
+		memberId = #{loginedMemberId},
+		`body` = #{body},
+		boardId = #{boardId};
+	</insert>
+	
+	<select id="getOneArticleAllReplies" parameterType="map" resultMap="articleReply">
+		SELECT AR.*, IFNULL(M.loginId, '존재하지 않는 사용자') AS writer
+		FROM articleReply AS AR
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = AR.memberId AND M.delStatus != TRUE
+		WHERE AR.articleId = #{articleId} AND AR.boardId = #{boardId}		
+	</select>
+	
+	<select id="getOneArticleOneReplyByIdArticleIdBoardId" parameterType="map" resultMap="articleReply">
+		SELECT AR.*, IFNULL(M.loginId, '존재하지 않는 사용자') AS writer
+		FROM articleReply AS AR
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = AR.memberId
+		WHERE AR.articleId = #{articleId} AND AR.boardId = #{boardId} AND AR.id = #{id}		
+	</select>
+	
+	<update id="deleteOneArticleOneReplyByIdArticleIdBoardId" parameterType="map">
+		UPDATE articleReply
+		SET delStatus = TRUE
+		<if test="role != null and role == 'admin'">
+			, blindStatus = TRUE
+		</if>
+		WHERE id = #{id} AND articleId = #{articleId} AND boardId = #{boardId}
+		
+	</update>
+	
+	<update id="modifyReplyByIdArticleIdBoardId" parameterType="map">
+		UPDATE articleReply
+		SET regDate = NOW(),
+		body = #{body}
+		WHERE id = #{id} AND articleId = #{articleId} AND boardId = #{boardId}
+	</update>
+	
+	<select id="getMemberRepliesByMemberId" parameterType="map" resultMap="articleReply">		
+		SELECT AR.*, IFNULL(M.loginId, '존재하지 않는 사용자') AS writer
+		FROM articleReply AS AR
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = AR.memberId
+		WHERE AR.memberId = #{memberId}
+		<if test="role == null or role == ''">
+			AND AR.delStatus = 0
+		</if>
+		LIMIT #{startNum}, #{perPageNum}
+	</select>
+	
+	<select id="getReplyTotalCountByMemberId" parameterType="map" resultType="Integer">
+		SELECT COUNT(AR.id)
+		FROM articleReply AS AR
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = AR.memberId
+		WHERE AR.memberId= #{memberId}		
+		<if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">			
+			<if test="searchType == 'body'"> AND A.body LIKE CONCAT('%', #{searchKeyword}, '%')</if>			
+		</if>
+	</select>
+	
+	<update id="deleteOneArticleAllReplies" parameterType="map">
+		UPDATE articleReply
+		SET delStatus = 1
+		WHERE articleId = #{id} AND boardId = #{boardId}
+	</update>
+	
+	<update id="cancelDeleteOneArticleOneReplyByIdArticleIdBoardId" parameterType="map">
+		UPDATE articleReply
+		SET delStatus = FALSE
+		<if test="role != null and role == 'admin'">
+			, blindStatus = FALSE
+		</if>
+		WHERE id = #{id} AND articleId = #{articleId} AND boardId = #{boardId}
+	</update>
+	
+	<resultMap id="articleReply" type="com.example.demo.dto.ArticleReply">
+		<id property="id" column="id"/>
+		<id property="regDate" column="regDate"/>
+		<id property="articleId" column="articleId"/>
+		<id property="memberId" column="memberId"/>
+		<id property="body" column="body"/>
+		<id property="boardId" column="boardId"/>
+		<id property="delStatus" column="delStatus"/>
+		<id property="blindStatus" column="blindStatus"/>
+		<association property="extra" javaType="map">
+			<id property="writer" column="writer"/>
+		</association>
+	</resultMap>
+</mapper>

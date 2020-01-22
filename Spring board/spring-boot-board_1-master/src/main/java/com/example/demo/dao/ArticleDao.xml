@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.ArticleDao">
+	<select id="getArticleList" parameterType="map" resultMap="article">
+		SELECT A.*, IFNULL(M.loginId, '존재하지 않는 사용자') AS writer, IFNULL(SUM(L.val),0) AS likeCnt
+		FROM article AS A
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = A.memberId AND M.delStatus != TRUE
+		LEFT OUTER JOIN `like` AS L
+		ON L.relType = 'article' AND L.relId = A.id
+		WHERE A.boardId = #{boardId}
+		<if test="role == null or role == ''">
+			AND A.delStatus = 0
+		</if>
+		<if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+			<if test="searchType == 'title'"> AND A.title LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'body'"> AND A.body LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'writer'"> AND M.loginId LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		</if>	
+		GROUP BY A.id
+		ORDER BY
+		<choose>
+			<when test="sortType != null and sortType != ''">
+				<if test="sortType == 'latest'"> A.id DESC </if>
+				<if test="sortType == 'oldest'"> A.id </if>
+				<if test="sortType == 'highLike'"> likeCnt DESC </if>
+				<if test="sortType == 'lowLike'"> likeCnt </if>
+				<if test="sortType == 'highView'"> A.view DESC</if>
+				<if test="sortType == 'lowView'"> A.view </if>
+			</when>
+			<otherwise>
+				A.id DESC
+			</otherwise>
+		</choose>
+		, A.id DESC				
+		LIMIT #{startNum}, #{perPageNum}	
+	</select>
+	
+	<select id="getTotalCount" parameterType="map" resultType="Integer">
+		SELECT COUNT(A.id)
+		FROM article AS A
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = A.memberId
+		WHERE A.boardId = #{boardId}
+		<if test="role == null or role == ''">
+			AND A.delStatus = 0
+		</if>
+		<if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+			<if test="searchType == 'title'"> AND A.title LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'body'"> AND A.body LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'writer'"> AND M.loginId LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		</if>
+	</select>
+	
+	<select id="getOneArticleById" parameterType="map" resultMap="article">
+		SELECT A.*, IFNULL(M.loginId, '존재하지 않는 사용자') AS writer
+		FROM article AS A
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = A.memberId AND M.delStatus != TRUE
+		WHERE A.id = #{id} AND A.boardId = #{boardId}
+	</select>
+	
+	<insert id="addOneArticle" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO article
+		SET regDate = NOW(),
+		title = #{title},
+		body = #{body},
+		boardId = #{boardId},
+		memberId = #{loginedMemberId}
+	</insert>
+	
+	<update id="deleteOneArticle" parameterType="map">
+		UPDATE article
+		SET delStatus = TRUE
+		<if test="role != null and role == 'admin'">
+			, blindStatus = TRUE
+		</if>
+		WHERE id = #{id} AND boardId = #{boardId}
+	</update>
+	
+	<update id="modifyArticle" parameterType="map">
+		UPDATE article
+		SET title = #{title},
+		body = #{body}
+		WHERE id = #{id} AND boardId = #{boardId}
+	</update>
+	
+	<select id="getArticleLikes" parameterType="map" resultType="Integer">
+		SELECT SUM(val) FROM `like`
+		WHERE relType=#{type} AND relId = #{relId}
+		GROUP BY val
+	</select>
+	
+	<select id="getArticleLikeByMemberId" parameterType="map" resultType="Like">
+		SELECT * FROM `like`
+		WHERE relType=#{type} AND relId = #{relId} AND memberId = #{loginedMemberId}
+	</select>
+	
+	<insert id="addArticleLike" parameterType="map">
+		INSERT INTO `like`
+		SET regDate = NOW(),
+		relType = #{type},
+		relId = #{relId},
+		memberId = #{loginedMemberId},
+		val = #{val}
+	</insert>
+	<delete id="deleteArticleLike" parameterType="map">
+		DELETE FROM `like`
+		WHERE relType=#{type} AND relId = #{relId} AND memberId = #{loginedMemberId} 	
+	</delete>
+	<update id="updateArticleLike" parameterType="map">
+		UPDATE `like`
+		SET regDate = NOW(),
+		val = #{val}
+		WHERE relType=#{type} AND relId = #{relId} AND memberId = #{loginedMemberId}
+	</update>
+	
+	<update id="updateArticleView" parameterType="map">
+		UPDATE article
+		SET `view` = `view` + 1
+		WHERE id = #{id} AND boardId = #{boardId}
+	</update>
+	
+	<select id="getMemberArticlesByMemberId" parameterType="map" resultMap="article">
+		SELECT A.*, IFNULL(M.loginId, '존재하지 않는 사용자') AS writer, IFNULL(SUM(L.val),0) AS likeCnt
+		FROM article AS A
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = A.memberId
+		LEFT OUTER JOIN `like` AS L
+		ON L.relType = 'article' AND L.relId = A.id
+		WHERE A.memberId = #{memberId}
+		<if test="role == null or role == ''">
+			AND A.delStatus = 0
+		</if>
+		<if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+			<if test="searchType == 'title'"> AND A.title LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'body'"> AND A.body LIKE CONCAT('%', #{searchKeyword}, '%')</if>			
+		</if>	
+		GROUP BY A.id
+		ORDER BY
+		<choose>
+			<when test="sortType != null and sortType != ''">
+				<if test="sortType == 'latest'"> A.id DESC </if>
+				<if test="sortType == 'oldest'"> A.id </if>
+				<if test="sortType == 'highLike'"> likeCnt DESC </if>
+				<if test="sortType == 'lowLike'"> likeCnt </if>
+				<if test="sortType == 'highView'"> A.view DESC</if>
+				<if test="sortType == 'lowView'"> A.view </if>
+			</when>
+			<otherwise>
+				A.id DESC
+			</otherwise>
+		</choose>
+		, A.id DESC				
+		LIMIT #{startNum}, #{perPageNum}
+	</select>	
+	
+	<select id="getArticleTotalCountByMemberId" parameterType="map" resultType="Integer">
+		SELECT COUNT(A.id)
+		FROM article AS A
+		LEFT OUTER JOIN `member` AS M
+		ON M.id = A.memberId
+		WHERE A.memberId= #{memberId}		
+		<if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+			<if test="searchType == 'title'"> AND A.title LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'body'"> AND A.body LIKE CONCAT('%', #{searchKeyword}, '%')</if>			
+		</if>
+	</select>
+	
+	<select id="getBoardName" parameterType="map" resultType="string">
+		SELECT name FROM `board`
+		WHERE id = #{boardId}
+	</select>
+	
+	<update id="cancelDeleteOneArticle" parameterType="map">
+		UPDATE article
+		SET delStatus = FALSE
+		<if test="role != null and role == 'admin'">
+			, blindStatus = FALSE
+		</if>
+		WHERE id = #{id} AND boardId = #{boardId}
+	</update>
+	
+	<resultMap type="com.example.demo.dto.Article" id="article">
+		<id property="id" column="id"/>
+		<id property="regDate" column="regDate"/>
+		<id property="title" column="title"/>
+		<id property="body" column="body"/>
+		<id property="memberId" column="memberId"/>
+		<id property="boardId" column="boardId"/>
+		<id property="view" column="view"/>
+		<id property="delStatus" column="delStatus"/>
+		<id property="blindStatus" column="blindStatus"/>
+		<association property="extra" javaType="map">
+			<id property="writer" column="writer"/>
+			<id property="likeCnt" column="likeCnt"/>
+		</association>
+	</resultMap>
+</mapper>
